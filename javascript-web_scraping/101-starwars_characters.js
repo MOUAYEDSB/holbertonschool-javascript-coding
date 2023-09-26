@@ -30,7 +30,7 @@ function fetchAndPrintCharacters(url) {
 
     // Function to fetch and print character names
     function fetchCharacterName(index) {
-      if (index >= characterUrls.length) {
+       if (index >= characterUrls.length) {
         // All characters have been printed
         return;
       }
