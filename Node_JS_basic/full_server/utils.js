@@ -1,29 +1,25 @@
 const fs = require('fs');
+const csvParser = require('csv-parser');
 
 function readDatabase(filePath) {
     return new Promise((resolve, reject) => {
-        fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) {
-                reject(`Error reading the file: ${err.message}`);
-            } else {
-                try {
-                    const jsonData = JSON.parse(data);
-                    const result = {};
+        const results = {};
 
-                    jsonData.forEach(student => {
-                        const { field, firstname } = student;
-                        if (!result[field]) {
-                            result[field] = [];
-                        }
-                        result[field].push(firstname);
-                    });
-
-                    resolve(result);
-                } catch (error) {
-                    reject(`Error parsing JSON data: ${error.message}`);
+        fs.createReadStream(filePath)
+            .pipe(csvParser())
+            .on('data', (row) => {
+                const { firstname, lastname, age, field } = row;
+                if (!results[field]) {
+                    results[field] = [];
                 }
-            }
-        });
+                results[field].push(firstname);
+            })
+            .on('end', () => {
+                resolve(results);
+            })
+            .on('error', (error) => {
+                reject(`Error reading the CSV file: ${error.message}`);
+            });
     });
 }
 
